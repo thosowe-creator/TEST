@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Messierist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img class="brand-logo" src="messierist-logo.svg" alt="MESSERIST logo" />
+      </div>
+
+      <section class="panel">
+        <h2>Design</h2>
+        <label>Title<input id="titleInput" type="text" value="TEXT" /></label>
+        <label>Footer text 1<input id="footerInput" type="text" value="TEXT" />
+        </label>
+        <label>Footer text 2<input id="dateInput" type="text" value="TEXT" /></label>
+        <label>Template<select id="templateSelect"><option value="classic">10 × 11</option><option value="wide">11 × 10</option></select></label>
+                <label>Font<select id="fontSelect"></select></label>
+        <div class="color-grid">
+          <label>Background <input id="bgColor" type="color" value="#050505" /></label>
+          <label>Text <input id="textColor" type="color" value="#f5f5f5" /></label>
+        </div>
+        <label>Number<input id="accentColor" type="color" value="#ffffff" /></label>
+        <label class="check"><input id="typeColors" type="checkbox" checked /> Type-colored labels</label>
+      </section>
+
+      <section class="panel">
+        <h2>Custom Grid</h2>
+        <label class="check"><input id="customGridEnabled" type="checkbox" /> Enable custom grid</label>
+        <label>Layout mode
+          <select id="customGridLayout">
+            <option value="free">Free layout</option>
+            <option value="fit">Fit layout</option>
+          </select>
+        </label>
+        <label>Highlight type
+          <select id="highlightMode">
+            <option value="manual">Manual selection</option>
+            <option value="preset">Preset</option>
+          </select>
+        </label>
+        <label>Preset
+          <select id="presetSelect">
+            <option value="bigThree">M31 / M42 / M45</option>
+            <option value="deepSkyIcons">Deep sky icons</option>
+            <option value="galaxyShowcase">Galaxy showcase</option>
+          </select>
+        </label>
+        <p id="manualCustomHint" class="hint">Manual mode: open each Messier tile and choose Tile Size.</p>
+        <p id="presetCustomHint" class="hint">Preset mode: calculated sizes are applied automatically.</p>
+        <p id="customGridStatus" class="hint custom-status">Custom Grid is off.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Actions</h2>
+        <button id="bulkUploadBtn" class="primary">Bulk upload images</button>
+        <input id="bulkUploadInput" type="file" accept="image/*" multiple hidden />
+        <p class="hint">File names like M31.jpg are matched automatically.</p>
+        <div class="button-grid">
+          <button id="exportPngBtn">Export PNG</button><button id="saveProjectBtn">Save project</button><button id="loadProjectBtn">Load project</button><button id="clearBtn" class="danger">Clear all</button>
+        </div>
+        <input id="loadProjectInput" type="file" accept="application/json" hidden />
+      </section>
+
+      <section class="panel progress-panel">
+        <h2>Progress</h2>
+        <div class="progress-number"><span id="completedCount">0</span><small>/110</small></div>
+        <div class="progress-bar"><div id="progressFill"></div></div>
+        <div id="typeStats" class="type-stats"></div>
+      </section>
+    </aside>
+
+    <main id="workspace" class="workspace">
+      <div id="posterWrap" class="poster-wrap">
+        <section id="poster" class="poster template-classic">
+          <header class="poster-header"><h2 id="posterTitle">TEXT</h2></header>
+          <div id="grid" class="messier-grid"></div>
+          <footer class="poster-footer"><span id="posterFooter">TEXT</span><span id="posterDateText">TEXT</span></footer>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <button id="closeModal" class="modal-close">×</button>
+      <h3 id="modalTitle">M1</h3>
+      <p id="modalMeta"></p>
+      <div class="modal-actions"><label class="upload-label">Upload image<input id="singleUpload" type="file" accept="image/*" hidden /></label><button id="removeImageBtn" class="danger">Remove image</button></div>
+      <div id="imageStage" class="image-stage">
+        <div id="transformTarget" class="image-transform selected">
+          <img id="stageImage" alt="preview" draggable="false" />
+          <span class="resize-handle handle-nw" data-handle="resize"></span>
+          <span class="resize-handle handle-n" data-handle="resize"></span>
+          <span class="resize-handle handle-ne" data-handle="resize"></span>
+          <span class="resize-handle handle-e" data-handle="resize"></span>
+          <span class="resize-handle handle-se" data-handle="resize"></span>
+          <span class="resize-handle handle-s" data-handle="resize"></span>
+          <span class="resize-handle handle-sw" data-handle="resize"></span>
+          <span class="resize-handle handle-w" data-handle="resize"></span>
+          <span id="rotateHandle" class="rotate-handle" data-handle="rotate"></span>
+        </div>
+      </div>
+
+
+      <div id="tileSizePanel" class="tile-size-panel">
+        <label>Tile Size
+          <select id="tileSizeSelect"></select>
+        </label>
+        <p id="tileSizeHint" class="hint"></p>
+      </div>
+
+      <details class="log-panel">
+        <summary>LOG</summary>
+        <div class="log-grid">
+          <label>Location<input id="logLocation" type="text" placeholder="Observation site" /></label>
+          <label>Date<input id="logDate" type="text" placeholder="YYYY-MM-DD" /></label>
+          <label>Telescope / Lens<input id="logTelescope" type="text" placeholder="Scope or lens" /></label>
+          <label>Mount<input id="logMount" type="text" placeholder="Mount" /></label>
+          <label>Filter<input id="logFilter" type="text" placeholder="Filter" /></label>
+          <label>Camera<input id="logCamera" type="text" placeholder="Camera" /></label>
+          <label>Software<input id="logSoftware" type="text" placeholder="Stacking / processing" /></label>
+          <label class="log-notes">Memo<textarea id="logNotes" placeholder="Exposure, gain, sky condition, processing notes, etc."></textarea></label>
+        </div>
+      </details>
+
+      <div class="modal-actions transform-actions">
+        <button id="saveTransformBtn" class="primary">Save</button>
+        <button id="resetTransformBtn">Reset</button>
+      </div>
+      
+    </div>
+  </div>
+
+  <div id="confirmModal" class="modal" aria-hidden="true">
+    <div class="modal-card confirm-card">
+      <h3>Unsaved changes</h3>
+      <p>You have unsaved changes. Save the project before continuing.</p>
+      <div class="modal-actions single">
+        <button id="confirmSaveBtn" class="primary">Save project</button>
+        <button id="confirmCancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
